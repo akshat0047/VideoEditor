@@ -1,0 +1,29 @@
+{
+  "compilerOptions": {
+    "target": "es2016",
+    "module": "commonjs",
+    "outDir": "./dist",
+    "strict": true,
+    "esModuleInterop": true,
+    "inlineSourceMap": true,
+    "noImplicitAny": false,
+    "types": [
+      "node",
+      "jest",
+    ],
+    "typeRoots": [
+      "./types",
+      "./node_modules/@types"
+    ]
+  },
+  "exclude": [
+    "node_modules",
+    "**/*.test.ts"
+  ],
+  "include": [
+    "./src/**/*.tsx",
+    "./src/**/*.ts", 
+    "./tests/*.spec.ts",  
+    "./tests/e2e/*.spec.ts", "src/middleware/authMiddleware.ts",  
+]
+}
