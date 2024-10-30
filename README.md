@@ -70,7 +70,7 @@ A set of REST API to carry basic video management operations along with editing 
    ```
 
 4. **Running the Application**
-    - Open `http://localhost:5000` in the browser to upload videos
     - Open `http://localhost:3000/api-docs` in the browser
     - Authorize swagger API with API_AUTH token added in `.env` file
     - Try API's
+    - Under Development but videos can also be uploaded by visiting frontend
