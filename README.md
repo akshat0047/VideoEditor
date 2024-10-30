@@ -1,6 +1,12 @@
 # VideoEditor
 A set of REST API to carry basic video management operations along with editing the video. Also, frontend-react application to upload and edit the videos.
 
+# Assumptions
+- Storing the files on local storage in `/uploads` for the POC
+- Merging the videos with same metadata as converting and making videos compatible to be merged is out of scope of assignment
+- Saving the file as temporary to check duration, in real scenario either it will be checked on Frontend or through buffer
+- Expiry of links will be maintained by running a cron job on the database, in real-scenario we can add a middleware on shareable link for expiry check
+
 ## Table of Contents
 
 - [Technologies Used](#technologies-used)
