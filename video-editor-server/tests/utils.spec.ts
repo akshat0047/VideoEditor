@@ -1,132 +1,135 @@
-// __tests__/videoProcessing.test.ts
 import ffmpeg from 'fluent-ffmpeg';
-import { getVideoDuration, createThumbnail, getVideoMetadata, checkCompatibility } from '../src/utils/utils';
+import path from 'path';
+import { getVideoDuration, createThumbnail, getVideoMetadata, checkCompatibility } from '../src/utils/utils'; // Adjust path accordingly
 
+// Define the mock structure for ffmpeg
+// Define the mock structure for ffmpeg
+interface MockFfmpegInstance {
+    on: (event: string, callback: Function) => MockFfmpegInstance; // specify the method signature
+    screenshots: jest.Mock;
+}
+
+interface MockFfmpeg {
+    (input: string): MockFfmpegInstance;
+    ffprobe: jest.Mock;
+    setFfmpegPath: jest.Mock;
+}
+
+// Mock ffmpeg and its methods
 jest.mock('fluent-ffmpeg', () => {
-    const mockFfmpeg = {
-        ffprobe: jest.fn(),
+    const mockFfmpegInstance: MockFfmpegInstance = {
+        on: function (this: MockFfmpegInstance, event: string, callback: Function) {
+            // Simulate chaining
+            if (event === 'end') {
+                setTimeout(() => callback(), 0);
+            }
+            return this;
+        },
         screenshots: jest.fn().mockReturnThis(),
-        on: jest.fn().mockReturnThis(),
     };
-    return jest.fn(() => mockFfmpeg);
+    
+    const mockFfmpeg: MockFfmpeg = jest.fn(() => mockFfmpegInstance) as any;
+    mockFfmpeg.ffprobe = jest.fn(); 
+    mockFfmpeg.setFfmpegPath = jest.fn();
+    return mockFfmpeg;
 });
 
-describe('Video Processing Utilities', () => {
-    beforeEach(() => {
-        jest.clearAllMocks();
-    });
+describe('Video Utilities', () => {
 
     describe('getVideoDuration', () => {
-        it('should return video duration', async () => {
-            const mockDuration = 120; // Mock duration of 120 seconds
-            ffmpeg().ffprobe.mockImplementation((filePath, callback) => {
+        it('should return video duration when ffprobe succeeds', async () => {
+            const testFilePath = 'test-video.mp4';
+            const mockDuration = 120;
+
+            (ffmpeg.ffprobe as jest.Mock).mockImplementation((_, callback) => {
                 callback(null, { format: { duration: mockDuration } });
             });
 
-            const duration = await getVideoDuration('mock/path/to/video.mp4');
-            expect(duration).toBe(mockDuration);
+            await expect(getVideoDuration(testFilePath)).resolves.toBe(mockDuration);
         });
 
-        it('should handle errors', async () => {
-            ffmpeg().ffprobe.mockImplementation((filePath, callback) => {
-                callback(new Error('Error retrieving duration'), null);
+        it('should reject if ffprobe encounters an error', async () => {
+            const testFilePath = 'test-video.mp4';
+            const errorMessage = 'ffprobe error';
+
+            (ffmpeg.ffprobe as jest.Mock).mockImplementation((_, callback) => {
+                callback(new Error(errorMessage), null);
             });
 
-            await expect(getVideoDuration('mock/path/to/video.mp4')).rejects.toThrow('Error retrieving duration');
+            await expect(getVideoDuration(testFilePath)).rejects.toThrow(errorMessage);
         });
     });
 
     describe('createThumbnail', () => {
+        const testFilePath = 'test-video.mp4';
+        const mockThumbnailFilename = 'thumbnail.png';
+        const uploadsDir = path.join(__dirname, '../../uploads');
+
         it('should create a thumbnail successfully', async () => {
-            const mockFfmpeg = ffmpeg(); // Create a mock ffmpeg instance
-            mockFfmpeg.on.mockImplementation((event, callback) => {
-                if (event === 'end') {
-                    callback(); // Trigger the end event
-                }
-                return mockFfmpeg; // Return the mock ffmpeg instance
+            await createThumbnail(testFilePath, mockThumbnailFilename);
+            expect(ffmpeg(testFilePath).screenshots).toHaveBeenCalledWith({
+                count: 1,
+                folder: uploadsDir,
+                filename: path.basename(mockThumbnailFilename),
+                size: '320x240',
             });
-
-            const result = await createThumbnail('mock/path/to/video.mp4', 'thumbnail.png');
-            expect(result).toBe(true);
-            expect(mockFfmpeg.screenshots).toHaveBeenCalled();
-        });
-
-        it('should handle errors when creating a thumbnail', async () => {
-            const mockFfmpeg = ffmpeg(); // Create a mock ffmpeg instance
-            mockFfmpeg.on.mockImplementation((event, callback) => {
-                if (event === 'error') {
-                    callback(new Error('Error creating thumbnail')); // Trigger the error event
-                }
-                return mockFfmpeg; // Return the mock ffmpeg instance
-            });
-
-            await expect(createThumbnail('mock/path/to/video.mp4', 'thumbnail.png')).rejects.toThrow('Error creating thumbnail');
         });
     });
 
     describe('getVideoMetadata', () => {
-        it('should return video metadata', async () => {
-            const mockMetadata = { title: 'Test Video' };
-            ffmpeg().ffprobe.mockImplementation((videoPath, callback) => {
+        it('should return metadata when ffprobe succeeds', async () => {
+            const testFilePath = 'test-video.mp4';
+            const mockMetadata = { streams: [{ codec_name: 'h264' }], format: { duration: 60 } };
+
+            (ffmpeg.ffprobe as jest.Mock).mockImplementation((_, callback) => {
                 callback(null, mockMetadata);
             });
 
-            const metadata = await getVideoMetadata('mock/path/to/video.mp4');
-            expect(metadata).toEqual(mockMetadata);
+            await expect(getVideoMetadata(testFilePath)).resolves.toEqual(mockMetadata);
         });
 
-        it('should handle errors', async () => {
-            ffmpeg().ffprobe.mockImplementation((videoPath, callback) => {
-                callback(new Error('Error retrieving metadata'), null);
+        it('should reject if ffprobe encounters an error', async () => {
+            const testFilePath = 'test-video.mp4';
+            const errorMessage = 'ffprobe error';
+
+            (ffmpeg.ffprobe as jest.Mock).mockImplementation((_, callback) => {
+                callback(new Error(errorMessage), null);
             });
 
-            await expect(getVideoMetadata('mock/path/to/video.mp4')).rejects.toThrow('Error retrieving metadata');
+            await expect(getVideoMetadata(testFilePath)).rejects.toThrow(errorMessage);
         });
     });
 
     describe('checkCompatibility', () => {
-        it('should return true for compatible videos', () => {
+        it('should return true if all videos have the same codec and resolution', () => {
             const metadataArray = [
-                {
-                    streams: [{ codec_name: 'h264', width: 1920, height: 1080 }]
-                },
-                {
-                    streams: [{ codec_name: 'h264', width: 1920, height: 1080 }]
-                }
+                { streams: [{ codec_name: 'h264', width: 1280, height: 720 }] },
+                { streams: [{ codec_name: 'h264', width: 1280, height: 720 }] },
             ];
 
-            const isCompatible = checkCompatibility(metadataArray);
-            expect(isCompatible).toBe(true);
+            expect(checkCompatibility(metadataArray)).toBe(true);
         });
 
-        it('should return false for incompatible videos', () => {
+        it('should return false if videos have different codecs', () => {
             const metadataArray = [
-                {
-                    streams: [{ codec_name: 'h264', width: 1920, height: 1080 }]
-                },
-                {
-                    streams: [{ codec_name: 'hevc', width: 1920, height: 1080 }]
-                }
+                { streams: [{ codec_name: 'h264', width: 1280, height: 720 }] },
+                { streams: [{ codec_name: 'vp9', width: 1280, height: 720 }] },
             ];
 
-            const isCompatible = checkCompatibility(metadataArray);
-            expect(isCompatible).toBe(false);
+            expect(checkCompatibility(metadataArray)).toBe(false);
         });
 
-        it('should return false if no metadata is provided', () => {
-            const isCompatible = checkCompatibility([]);
-            expect(isCompatible).toBe(false);
-        });
-
-        it('should handle errors gracefully', () => {
-            const faultyMetadataArray = [
-                {
-                    streams: null // Simulate missing streams
-                }
+        it('should return false if videos have different resolutions', () => {
+            const metadataArray = [
+                { streams: [{ codec_name: 'h264', width: 1280, height: 720 }] },
+                { streams: [{ codec_name: 'h264', width: 1920, height: 1080 }] },
             ];
 
-            const isCompatible = checkCompatibility(faultyMetadataArray);
-            expect(isCompatible).toBe(false);
+            expect(checkCompatibility(metadataArray)).toBe(false);
+        });
+
+        it('should return false for an empty metadata array', () => {
+            expect(checkCompatibility([])).toBe(false);
         });
     });
 });

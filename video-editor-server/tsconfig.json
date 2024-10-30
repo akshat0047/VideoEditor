@@ -24,6 +24,6 @@
     "./src/**/*.tsx",
     "./src/**/*.ts", 
     "./tests/*.spec.ts",  
-    "./tests/e2e/*.spec.ts", "src/middleware/authMiddleware.ts",  
+    "tests/controllers/e2e/*.spec.ts", "src/middleware/authMiddleware.ts", "tests/videos.controller.spec.ts", "tests/e2e/links.controller.e2e.spec.ts", "tests/authMiddleware.spec.ts", "tests/utils.spec.ts", "tests/link.repository.spec.ts", "tests/e2e/videos.controller.e2e.spec.ts",  
 ]
 }

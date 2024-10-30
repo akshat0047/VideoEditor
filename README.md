@@ -32,8 +32,8 @@ A set of REST API to carry basic video management operations along with editing 
 
 ### Prerequisites
 
-- Node.js (version >= 16.x)
-- npm or yarn (for package management)
+- Node.js (version >= 18.x)
+- npm (for package management)
 - sqllite (already present in repository)
 
 ### Installation

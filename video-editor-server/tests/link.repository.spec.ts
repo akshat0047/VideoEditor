@@ -4,7 +4,6 @@ import LinkRepository from '../src/repositories/link.repository';
 import dao from '../src/repositories/dao';
 import Link from '../src/models/link';
 import { uuidv4 } from 'uuidv7';
-import fs from 'fs';
 
 jest.mock('../src/repositories/dao');
 jest.mock('uuidv7', () => ({

@@ -8,7 +8,12 @@ module.exports = {
       '^.+\\.ts$': 'ts-jest',
     },
     moduleNameMapper: {
-    //   '^node:fs$': 'fs',
+      '^node:(.+)$': '$1',
       '^@/(.*)$': '<rootDir>/src/$1',
     },
+    globals: {
+      'ts-jest': {
+          tsconfig: 'tsconfig.json', // Ensure it points to the correct tsconfig
+      },
+  },
   };

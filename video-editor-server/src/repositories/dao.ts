@@ -1,12 +1,35 @@
-import * as sqlite from 'sqlite3'
+import * as sqlite from 'sqlite3';
+import fs from 'fs';
+import path from 'path';
+
 const sqlite3 = sqlite.verbose();
-const db = new sqlite3.Database('./db/sqlite.db');
 
-export default class {
+const dir = path.resolve(__dirname, '../../db'); // Use absolute path
 
-    static setupDbForDev() {
-        db.serialize(function () {
-            //   Drop Tables:
+// Create the directory if it does not exist
+if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+}
+
+const dbPath = path.join(dir, 'sqlite.db');
+console.log('Database path:', dbPath); // Log the database path
+
+const db = new sqlite3.Database(dbPath, (err) => {
+    if (err) {
+        console.error('Error opening database:', err.message);
+    } 
+});
+
+// Define a generic type for database rows
+interface DatabaseRow {
+    [key: string]: any; // Allow any structure for rows
+}
+
+export default class TDao {
+    // Setup the database for development
+    static setupDbForDev(): void {
+        db.serialize(() => {
+            // Drop Tables:
             const dropLinksTable = "DROP TABLE IF EXISTS links";
             db.run(dropLinksTable);
             const dropVideosTable = "DROP TABLE IF EXISTS videos";
@@ -21,11 +44,11 @@ export default class {
         });
     }
 
-    static teardownDb() {
+    // Teardown the database
+    static teardownDb(): void {
         // Drop all tables to clean up the database after tests
         try {
-            db.serialize(function () {
-                //   Drop Tables:
+            db.serialize(() => {
                 const dropLinksTable = "DROP TABLE IF EXISTS links";
                 db.run(dropLinksTable);
                 const dropVideosTable = "DROP TABLE IF EXISTS videos";
@@ -36,37 +59,39 @@ export default class {
         }
     }
 
-    static all(stmt, params) {
+    // Fetch all records
+    static all<T extends DatabaseRow>(stmt: string, params: any[]): Promise<T[]> {
         return new Promise((res, rej) => {
-            db.all(stmt, params, (error, result) => {
+            db.all(stmt, params, (error, result: T[]) => {
                 if (error) {
                     return rej(error.message);
                 }
                 return res(result);
             });
-        })
+        });
     }
-    static get(stmt, params) {
+
+    // Fetch a single record
+    static get<T extends DatabaseRow>(stmt: string, params: any[]): Promise<T | undefined> {
         return new Promise((res, rej) => {
-            db.get(stmt, params, (error, result) => {
+            db.get(stmt, params, (error, result: T) => {
                 if (error) {
                     return rej(error.message);
                 }
                 return res(result);
             });
-        })
+        });
     }
 
-    static run(stmt, params) {
+    // Run a statement
+    static run(stmt: string, params: any[]): Promise<void> {
         return new Promise((res, rej) => {
-            db.run(stmt, params, (error, result) => {
+            db.run(stmt, params, (error) => {
                 if (error) {
                     return rej(error.message);
                 }
-                return res(result);
+                return res(); // Resolve with no value on success
             });
-        })
+        });
     }
-
-
 }
