@@ -9,11 +9,6 @@ A set of REST API to carry basic video management operations along with editing 
   - [Prerequisites](#prerequisites)
   - [Installation](#installation)
   - [Running the Application](#running-the-application)
-- [API Documentation](#api-documentation)
-- [Frontend](#frontend)
-- [Backend](#backend)
-- [Contributing](#contributing)
-- [License](#license)
 
 ## Technologies Used
 
@@ -68,7 +63,7 @@ A set of REST API to carry basic video management operations along with editing 
    npm start
    ```
 
-4. **Using the application**
+4. **Running the application**
     - Open `http://localhost:5000` in the browser to upload videos
     - Open `http://localhost:3000/api-docs` in the browser
     - Authorize swagger API with API_AUTH token added in `.env` file
