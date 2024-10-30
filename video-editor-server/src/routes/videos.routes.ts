@@ -82,24 +82,26 @@ router.get("/:id", videosController.getVideoById)
 
 /**
  * @swagger
- * /api/v1/videos:
+ * /api/v1/videos/upload:
  *   post:
  *     tags:
  *     - Video Management
- *     summary: Upload a new video
+ *     summary: Upload a video file
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         multipart/form-data:
  *           schema:
- *             $ref: '#/components/schemas/Video'
+ *             type: object
+ *             properties:
+ *               video:
+ *                 type: string
+ *                 format: binary
  *     responses:
  *       201:
  *         description: Video uploaded successfully
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Video'
+ *       400:
+ *         description: No file uploaded
  */
 router.post("/upload", upload.single('video'), videosController.uploadVideo);
 
