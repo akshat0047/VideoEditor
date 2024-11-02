@@ -79,7 +79,7 @@ describe('LinkController', () => {
       await LinkController.syncExpiredLinks(req as Request, res as Response, next);
 
       expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalledWith({ message: 'Expired links deleted successfully' });
+      expect(res.json).toHaveBeenCalledWith({ message: 'Expired links synced successfully' });
       expect(linkRepo.deleteExpiredLinks).toHaveBeenCalledTimes(1);
     });
   });

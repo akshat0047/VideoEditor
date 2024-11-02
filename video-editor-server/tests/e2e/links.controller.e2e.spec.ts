@@ -3,18 +3,21 @@ import { app } from '../../index';
 import dao from '../../src/repositories/dao';
 
 beforeAll(async () => {
-    await dao.setupDbForDev(); // Ensure test database setup
+    await dao.setupDbForTest();
+    process.env.BYPASS_AUTH = 'true';
+    process.env.PORT = '3001';
 });
 
 afterAll(async () => {
-    await dao.teardownDb(); // Clean up after tests
+    await dao.teardownDb();
+    delete process.env.BYPASS_AUTH;
 });
 
 describe('LinkController E2E Tests', () => {
     it('should create a link successfully', async () => {
-        const videoId = 'test-video-id';
+        const videoId = 'video1';
         const response = await request(app)
-            .post('/api/v1/links')
+            .post('/api/v1/links/create')
             .send({ videoId, expiryTime: 30 });
 
         expect(response.status).toBe(201);
@@ -23,23 +26,19 @@ describe('LinkController E2E Tests', () => {
     });
 
     it('should fetch a link by video ID', async () => {
-        const videoId = 'test-video-id';
-        await request(app)
-            .post('/api/v1/links')
-            .send({ videoId, expiryTime: 30 });
-
+        const linkId = 'link1';
         const response = await request(app)
-            .get(`/api/v1/links/${videoId}`);
+            .get(`/api/v1/links/detail/${linkId}`);
 
         expect(response.status).toBe(200);
-        expect(response.body.link).toBeTruthy();
+        expect(response.body).toBeTruthy();
     });
 
-    it('should delete expired links', async () => {
+    it('should sync expired links', async () => {
         const response = await request(app)
-            .delete('/api/v1/links/expired');
+            .get('/api/v1/links/sync');
 
         expect(response.status).toBe(200);
-        expect(response.body.message).toBe('Expired links deleted successfully');
+        expect(response.body.message).toBe('Expired links synced successfully');
     });
 });

@@ -1,42 +1,46 @@
 import request from 'supertest';
 import { app } from '../../index';
 import dao from '../../src/repositories/dao';
+import { unlink } from 'fs/promises';
+import path from 'path';
+
+jest.mock('fs/promises', () => ({
+    ...jest.requireActual('fs/promises'),
+    unlink: jest.fn(),
+}));
 
 beforeAll(async () => {
-    await dao.setupDbForDev(); // Ensure test database setup
+    await dao.setupDbForTest();
+    process.env.BYPASS_AUTH = 'true';
+    process.env.PORT = '3001';
+    process.env.MAX_SIZE_MB = '5';
+    process.env.MAX_DURATION_SEC = '50';
+
+    const mockedUnlink = unlink as jest.Mock;
+    mockedUnlink.mockResolvedValue(undefined);
 });
 
 afterAll(async () => {
-    await dao.teardownDb(); // Clean up after tests
+    await dao.teardownDb();
+    delete process.env.BYPASS_AUTH;
+    delete process.env.PORT;
 });
 
 describe('VideoController E2E Tests', () => {
     it('should create a video record', async () => {
-        const video = {
-            fileName: 'sample.mp4',
-            filePath: '/path/to/video',
-            thumbnail: 'thumbnail.jpg',
-        };
+        const fileName = "test.mp4"
+        const videoPath = path.join(__dirname, '../../../uploads', fileName);
 
         const response = await request(app)
-            .post('/api/v1/videos')
-            .send(video);
+            .post('/api/v1/videos/upload')
+            .attach('file', videoPath);
 
         expect(response.status).toBe(201);
         expect(response.body.message).toBe('Video saved successfully');
     });
 
     it('should fetch a video by ID', async () => {
-        const videoId = 'test-video-id';
-        
-        await request(app)
-            .post('/api/v1/videos')
-            .send({
-                id: videoId,
-                fileName: 'sample.mp4',
-                filePath: '/path/to/video',
-                thumbnail: 'thumbnail.jpg',
-            });
+        const videoId = 'video1';
 
         const response = await request(app)
             .get(`/api/v1/videos/${videoId}`);
@@ -46,7 +50,7 @@ describe('VideoController E2E Tests', () => {
     });
 
     it('should delete a video by ID', async () => {
-        const videoId = 'test-video-id';
+        const videoId = 'video1';
 
         const response = await request(app)
             .delete(`/api/v1/videos/${videoId}`);

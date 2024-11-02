@@ -31,6 +31,6 @@ export default class LinkController {
     
     static async syncExpiredLinks(req: Request, res: Response, next: Function) {
         await linkRepo.deleteExpiredLinks();
-        return res.status(200).json({ message: 'Expired links deleted successfully'});
+        return res.status(200).json({ message: 'Expired links synced successfully'});
     };
 }
