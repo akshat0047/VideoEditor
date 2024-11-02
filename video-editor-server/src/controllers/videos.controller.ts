@@ -8,6 +8,7 @@ import path from 'path';
 import ffmpegInstaller from '@ffmpeg-installer/ffmpeg';
 import ffprobeInstaller from '@ffprobe-installer/ffprobe';
 import { checkCompatibility, createThumbnail, getVideoDuration, getVideoMetadata } from '../utils/utils';
+import { IVideo } from '../interfaces/interfaces';
 
 ffmpeg.setFfmpegPath(ffmpegInstaller.path);
 ffmpeg.setFfprobePath(ffprobeInstaller.path);
@@ -17,17 +18,21 @@ export default class VideoController {
     static MAX_SIZE_MB = parseInt(process.env.MAX_SIZE_MB || '50', 10) * 1024 * 1024; // Convert MB to bytes
     static MAX_DURATION_SEC = parseInt(process.env.MAX_DURATION_SEC || '120', 10); // Duration in seconds
 
-    static async getAllVideos(req: Request, res: Response, next: Function) {
-        let videos = await repo.getAllVideos();
-        return res.send({ videos });
-    };
+    static async getAllVideos(req: Request, res: Response, next: Function): Promise<void> {
+        try {
+            const videos: IVideo[] = await repo.getAllVideos();
+            res.status(200).json(videos);
+        } catch (error) {
+            next(error);
+        }
+    }
 
     static async getVideoById(req: Request, res: Response, next: Function) {
         let video = await repo.getVideoById(req.params.id)
         if(!video){
-            return res.status(404).send(video);
+            return res.status(404).json(video);
         }
-        return res.send({ video });
+        return res.status(200).json({ video });
     }
 
     static async uploadVideo(req: Request, res: Response, next: Function): Promise<Response> {
@@ -109,36 +114,44 @@ export default class VideoController {
             const trimVideo = await repo.getVideoById(videoId);
             const inputVideoPath = trimVideo.filePath;
             if (!inputVideoPath || !fs.existsSync(inputVideoPath)) {
-            return res.status(404).json({ message: 'Video file not found' });
+                return res.status(404).json({ message: 'Video file not found' });
             }
 
             // Define output path for trimmed video
             const outputFileName = `trim-${trimVideo.fileName}-${Date.now()}.mp4`;
             const outputFilePath = path.join(__dirname, '../../../uploads', outputFileName);
 
-            // Execute ffmpeg trim command
-            ffmpeg(inputVideoPath)
-            .setStartTime(start)
-            .duration(duration)
-            .output(outputFilePath)
-            .on('end', async () => {
-                // Save trim video object in the database
-                const thumbnailFilename = `${path.basename(outputFileName, path.extname(outputFileName))}-thumbnail.jpg`;
-                await createThumbnail(outputFilePath, thumbnailFilename);
+            return new Promise((resolve, reject) => {
+                // Execute ffmpeg trim command
+                ffmpeg(inputVideoPath)
+                .setStartTime(start)
+                .duration(duration)
+                .output(outputFilePath)
+                .on('end', async () => {
+                    try {
+                        // Save trim video object in the database
+                        const thumbnailFilename = `${path.basename(outputFileName, path.extname(outputFileName))}-thumbnail.jpg`;
+                        await createThumbnail(outputFilePath, thumbnailFilename);
 
-                const video = new Video(outputFileName, outputFilePath, path.join('../../../uploads', thumbnailFilename));
-                await repo.saveVideo(video); // Save video details to the database
+                        const video = new Video(outputFileName, outputFilePath, path.join('../../../uploads', thumbnailFilename));
+                        await repo.saveVideo(video); // Save video details to the database
 
-                return res.status(200).json({
-                message: 'Trimmed video generated successfully',
-                trimmedVideoPath: outputFilePath,
-                });
-            })
-            .on('error', (err) => {
-                console.error('Error trimming video:', err);
-                return res.status(500).json({ message: 'Error trimming video' });
-            })
-            .run();
+                        res.status(200).json({
+                            message: 'Trimmed video generated successfully',
+                            trimmedVideoPath: outputFilePath,
+                        });
+                        resolve(null);
+                    } catch (error) {
+                        reject(error);
+                    }
+                })
+                .on('error', (err) => {
+                    console.error('Error trimming video:', err);
+                    res.status(500).json({ message: 'Error trimming video' });
+                    reject(err);
+                })
+                .run();
+            });
         } catch (error) {
             console.error('Error processing video trim:', error);
             return res.status(500).json({ message: 'Server error while trimming video' });

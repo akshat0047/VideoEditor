@@ -1,4 +1,3 @@
-// __tests__/videoRepository.test.ts
 import { jest } from '@jest/globals';
 import VideoRepository from '../src/repositories/video.repository';
 import dao from '../src/repositories/dao';

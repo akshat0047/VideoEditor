@@ -1,19 +1,14 @@
-// jest.config.js
-module.exports = {
-    preset: 'ts-jest',
-    testEnvironment: 'node',
-    moduleFileExtensions: ['js', 'ts'],
-    testMatch: ['**/tests/*.spec.ts', '**/tests/**/*.spec.ts', '**/src/**/*.spec.ts'],
-    transform: {
-      '^.+\\.ts$': 'ts-jest',
-    },
-    moduleNameMapper: {
-      '^node:(.+)$': '$1',
-      '^@/(.*)$': '<rootDir>/src/$1',
-    },
-    globals: {
-      'ts-jest': {
-          tsconfig: 'tsconfig.json', // Ensure it points to the correct tsconfig
-      },
+export default {
+  preset: 'ts-jest',
+  testEnvironment: 'node',
+  transform: {
+    '^.+\\.ts$': 'ts-jest',
+    '^.+\\.jsx?$': 'babel-jest', // If you're using JSX as well
   },
-  };
+  moduleNameMapper: {
+    '^uuidv7$': require.resolve('uuidv7'), // Ensure to resolve the uuidv7 import correctly
+  },
+  transformIgnorePatterns: [
+    '/node_modules/(?!uuidv7)', // Ensure uuidv7 is transformed
+  ],
+};

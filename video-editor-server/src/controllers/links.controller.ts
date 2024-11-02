@@ -8,12 +8,16 @@ export default class LinkController {
 
     static async getLinkByVideo(req: Request, res: Response, next: Function) {
         let link = await linkRepo.getLinkByVideoId(req.params.id);
-        return res.send({ link });
+        return res.status(200).json({ link });
     };
 
     static async createLink(req: Request, res: Response, next: Function) {
         const { videoId, expiryTime} = req.body;
         const video = await videoRepo.getVideoById(videoId);
+
+        if (!video) {
+            return res.status(404).json({ message: 'Video file not found' });
+        }
 
         // Generate a temporary link for localhost
         const temporaryLink = `http://localhost:${process.env.PORT}/uploads/${video.fileName}`;

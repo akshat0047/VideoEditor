@@ -1,4 +1,3 @@
-// __tests__/linkRepository.test.ts
 import { jest } from '@jest/globals';
 import LinkRepository from '../src/repositories/link.repository';
 import dao from '../src/repositories/dao';

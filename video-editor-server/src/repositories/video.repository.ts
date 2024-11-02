@@ -1,12 +1,13 @@
 import dao from './dao';
 import Video from '../models/video';
 import { uuidv4 } from 'uuidv7';
+import { IVideo } from '../interfaces/interfaces';
 
 export default class {
 
-    static async getAllVideos(): Promise<Video[]> {
+    static async getAllVideos(): Promise<IVideo[]> {
         const videos = await dao.all("SELECT * FROM videos", [])
-        return <Video[]>videos
+        return <IVideo[]>videos
     }
 
     static async getVideoById(id: string): Promise<Video> {
