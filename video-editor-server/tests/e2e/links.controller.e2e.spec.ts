@@ -1,5 +1,5 @@
 import request from 'supertest';
-import { app } from '../../index';
+import { server, app } from '../../index';
 import dao from '../../src/repositories/dao';
 
 beforeAll(async () => {
@@ -11,6 +11,7 @@ beforeAll(async () => {
 afterAll(async () => {
     await dao.teardownDb();
     delete process.env.BYPASS_AUTH;
+    server.close();
 });
 
 describe('LinkController E2E Tests', () => {

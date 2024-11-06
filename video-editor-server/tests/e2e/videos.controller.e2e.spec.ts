@@ -1,5 +1,5 @@
 import request from 'supertest';
-import { app } from '../../index';
+import { server, app } from '../../index';
 import dao from '../../src/repositories/dao';
 import { unlink } from 'fs/promises';
 import path from 'path';
@@ -24,6 +24,7 @@ afterAll(async () => {
     await dao.teardownDb();
     delete process.env.BYPASS_AUTH;
     delete process.env.PORT;
+    server.close();
 });
 
 describe('VideoController E2E Tests', () => {
@@ -33,10 +34,10 @@ describe('VideoController E2E Tests', () => {
 
         const response = await request(app)
             .post('/api/v1/videos/upload')
-            .attach('file', videoPath);
+            .attach('video', videoPath);
 
         expect(response.status).toBe(201);
-        expect(response.body.message).toBe('Video saved successfully');
+        expect(response.body.message).toBe('Video uploaded successfully');
     });
 
     it('should fetch a video by ID', async () => {

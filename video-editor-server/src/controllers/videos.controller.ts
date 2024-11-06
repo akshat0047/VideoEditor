@@ -51,6 +51,8 @@ export default class VideoController {
             const originalFilename = req.file.originalname; // Get original filename
             const thumbnailFilename = `${path.basename(originalFilename, path.extname(originalFilename))}-thumbnail.jpg`;
 
+            
+
             // Save the video to the uploads folder
             const uploadsDir = path.join(__dirname, '../../../uploads');
             if (!fs.existsSync(uploadsDir)) {
@@ -75,9 +77,9 @@ export default class VideoController {
             const video = new Video(originalFilename, filePath, path.join('../../../uploads', thumbnailFilename));
             await repo.saveVideo(video); // Save video details to the database
 
-            return res.status(200).json({ message: 'Video uploaded successfully', filename: originalFilename });
+            return res.status(201).json({ message: 'Video uploaded successfully', filename: originalFilename });
         } catch (error) {
-            console.error(error);
+            console.log(error);
             return res.status(500).json({ message: 'Error uploading video' });
         }
     }
@@ -119,7 +121,7 @@ export default class VideoController {
 
             // Define output path for trimmed video
             const outputFileName = `trim-${trimVideo.fileName}-${Date.now()}.mp4`;
-            const outputFilePath = path.join(__dirname, '../../../uploads', outputFileName);
+            const outputFilePath = path.join(__dirname, '../../../uploads', outputFileName.slice(0,-3));
 
             return new Promise((resolve, reject) => {
                 // Execute ffmpeg trim command

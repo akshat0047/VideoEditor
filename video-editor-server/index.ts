@@ -28,4 +28,4 @@ dao.setupDbForDev();
 app.use('/api/v1/videos', videosRoutes);
 app.use('/api/v1/links', linksRoutes);
 
-app.listen(port, () => console.log(`Videoverse Assignment listening on port ${port}!`));
+export const server = app.listen(port, () => console.log(`Videoverse Assignment listening on port ${port}!`));

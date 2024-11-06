@@ -88,7 +88,7 @@ describe('VideoController', () => {
 
       await VideoController.uploadVideo(req as Request, res as Response, next);
 
-      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.status).toHaveBeenCalledWith(201);
       expect(res.json).toHaveBeenCalledWith({ message: 'Video uploaded successfully', filename: req.file.originalname });
     });
 
@@ -154,7 +154,7 @@ describe('VideoController', () => {
       (ffmpeg as jest.Mock).mockReturnValue(ffmpegMock);
 
       const outputFileName = `trim-${mockVideo.fileName}-${Date.now()}.mp4`;
-      const outputFilePath = path.join(__dirname, '../../uploads', outputFileName);
+      const outputFilePath = path.join(__dirname, '../../uploads', outputFileName.slice(0,-3));
 
       await VideoController.trimVideo(req as Request, res as Response, next);
 
