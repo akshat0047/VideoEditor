@@ -21,7 +21,7 @@ const VideoList: React.FC<VideoListProps> = ({ onSelectForCrop, onSelectForMerge
                     Authorization: `Bearer ${token}`,
                 },
             });
-            setVideos(response.data.videos);
+            setVideos(response.data);
         };
         fetchVideos();
     }, []);
@@ -35,7 +35,7 @@ const VideoList: React.FC<VideoListProps> = ({ onSelectForCrop, onSelectForMerge
     return (
             <VideoListContainer>
                 <VideoListGallery>
-                    {videos.map(video => (
+                    {videos?.map(video => (
                         <VideoItem key={video.id} selected={selectedIds.includes(video.id)}>
                             <VideoThumbnail
                                 src={video.thumbnail}
