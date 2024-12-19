@@ -17,14 +17,14 @@ const swaggerOptions = {
             },
         ],
         components: {
-            securitySchemes: {
-                bearerAuth: {
-                    type: 'http',
-                    scheme: 'bearer',
-                    bearerFormat: 'JWT',
-                    description: 'Enter your token in the format: Bearer <token>',
-                },
-            },
+            // securitySchemes: {
+            //     bearerAuth: {
+            //         type: 'http',
+            //         scheme: 'bearer',
+            //         bearerFormat: 'JWT',
+            //         description: 'Enter your token in the format: Bearer <token>',
+            //     },
+            // },
         },
         security: [
             {

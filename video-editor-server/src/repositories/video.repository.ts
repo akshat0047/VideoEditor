@@ -16,9 +16,9 @@ export default class {
     }
 
     static async saveVideo(video: Video): Promise<boolean> {
-        const stmt = `INSERT INTO videos (id, fileName, filePath, thumbnail) VALUES (?,?,?,?);`
+        const stmt = `INSERT INTO videos (id, fileName, thumbnail) VALUES (?,?,?);`
         try {
-            await dao.run(stmt, [uuidv4(), video.fileName, video.filePath, video.thumbnail]);
+            await dao.run(stmt, [uuidv4(), video.fileName, video.thumbnail]);
             return true;
         } catch (err) {
             console.error(err);

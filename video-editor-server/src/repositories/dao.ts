@@ -36,10 +36,10 @@ export default class TDao {
             db.run(dropVideosTable);
             
             // Create Tables:
-            const createLinksTable = "CREATE TABLE links (id TEXT PRIMARY KEY, videoId INTEGER NOT NULL, temporaryLink TEXT NOT NULL, expiryTime DATETIME NOT NULL, created_at DATETIME DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (videoId) REFERENCES videos (id) ON DELETE CASCADE);";
+            const createLinksTable = "CREATE TABLE links (id TEXT PRIMARY KEY, videoId INTEGER NOT NULL, temporaryLink TEXT NOT NULL, expiryTime INTEGER NOT NULL, created_at DATETIME DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (videoId) REFERENCES videos (id) ON DELETE CASCADE);";
             db.run(createLinksTable);
 
-            const createVideosTable = "CREATE TABLE IF NOT EXISTS videos (id TEXT PRIMARY KEY, fileName TEXT NOT NULL, filePath TEXT NOT NULL, thumbnail TEXT NOT NULL, created_at DATETIME DEFAULT CURRENT_TIMESTAMP)";
+            const createVideosTable = "CREATE TABLE IF NOT EXISTS videos (id TEXT PRIMARY KEY, fileName TEXT NOT NULL, thumbnail TEXT NOT NULL, created_at DATETIME DEFAULT CURRENT_TIMESTAMP)";
             db.run(createVideosTable);
         });
     }
@@ -53,16 +53,16 @@ export default class TDao {
             db.run(dropVideosTable);
             
             // Create Tables:
-            const createLinksTable = "CREATE TABLE links (id TEXT PRIMARY KEY, videoId INTEGER NOT NULL, temporaryLink TEXT NOT NULL, expiryTime DATETIME NOT NULL, created_at DATETIME DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (videoId) REFERENCES videos (id) ON DELETE CASCADE);";
+            const createLinksTable = "CREATE TABLE links (id TEXT PRIMARY KEY, videoId INTEGER NOT NULL, temporaryLink TEXT NOT NULL, expiryTime INTEGER NOT NULL, created_at DATETIME DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (videoId) REFERENCES videos (id) ON DELETE CASCADE);";
             db.run(createLinksTable);
 
             const insertLinksData = "INSERT INTO links (id, videoId, temporaryLink, expiryTime) VALUES ('link1', 1, 'http://localhost:3000/uploads/link1', 30), ('link2', 2, 'http://localhost:3000/uploads/link2', 30), ('link3', 1, 'http://localhost:3000/uploads/link3', 30);"
             db.run(insertLinksData);
 
-            const createVideosTable = "CREATE TABLE IF NOT EXISTS videos (id TEXT PRIMARY KEY, fileName TEXT NOT NULL, filePath TEXT NOT NULL, thumbnail TEXT NOT NULL, created_at DATETIME DEFAULT CURRENT_TIMESTAMP)";
+            const createVideosTable = "CREATE TABLE IF NOT EXISTS videos (id TEXT PRIMARY KEY, fileName TEXT NOT NULL, thumbnail TEXT NOT NULL, created_at DATETIME DEFAULT CURRENT_TIMESTAMP)";
             db.run(createVideosTable);
 
-            const insertVideosTable = "INSERT INTO videos (id, fileName, filePath, thumbnail) VALUES ('video1', 'sample1.mp4', '/path/to/video1.mp4', '/path/to/thumbnail1.jpg'), ('video2', 'sample2.mp4', '/path/to/video2.mp4', '/path/to/thumbnail2.jpg'), ('video3', 'sample3.mp4', '/path/to/video3.mp4', '/path/to/thumbnail3.jpg');"
+            const insertVideosTable = "INSERT INTO videos (id, fileName, thumbnail) VALUES ('video1', 'sample1.mp4', 'thumbnail1.jpg'), ('video2', 'sample2.mp4', 'thumbnail2.jpg'), ('video3', 'sample3.mp4', 'thumbnail3.jpg');"
             db.run(insertVideosTable);
         });
     }

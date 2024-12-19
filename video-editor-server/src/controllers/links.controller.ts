@@ -1,8 +1,12 @@
 import linkRepo from '../repositories/link.repository';
 import videoRepo from '../repositories/video.repository';
 import { Request, Response } from 'express'
+import crypto from 'crypto';
 import moment from 'moment';
 import Link from '../models/link';
+import { MEDIA_FOLDER, SECRET_KEY } from '../../index';
+
+
 
 export default class LinkController {
 
@@ -19,9 +23,18 @@ export default class LinkController {
             return res.status(404).json({ message: 'Video file not found' });
         }
 
-        // Generate a temporary link for localhost
-        const temporaryLink = `http://localhost:${process.env.PORT}/uploads/${video.fileName}`;
-        const expiry = moment().add(expiryTime, 'minutes').toISOString();
+        const protocol = req.protocol;
+        const host = req.get('host');
+
+        const expiry = moment().add(expiryTime, 'minutes').unix();
+
+        const fileName = video.fileName;
+        const data = `${fileName}.${expiry}`;
+        const signature = crypto.createHmac('sha256', SECRET_KEY).update(data).digest('hex');
+
+        // Generate the signed URL
+        const temporaryLink = `${protocol}://${host}/media/${fileName}?expiry=${expiry}&signature=${signature}`;
+
 
         const link = new Link(videoId, temporaryLink, expiry)
         await linkRepo.createLink(link); 

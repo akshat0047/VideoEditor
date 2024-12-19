@@ -15,6 +15,7 @@ export default class {
     }
 
     static async getLinkByVideoId(videoId: string): Promise<Link> {
+        console.log("videoId", videoId);
         const link = await dao.get("SELECT * FROM links WHERE videoId = ?", [videoId])
         return <Link>link;
     }

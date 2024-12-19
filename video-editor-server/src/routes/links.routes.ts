@@ -55,7 +55,7 @@ const router = express.Router()
  *       404:
  *         description: Link not found
  */
-router.get('/detail/:id', linksController.getLinkByVideo);
+router.get('/:id', linksController.getLinkByVideo);
 
 /**
  * @swagger
@@ -95,6 +95,6 @@ router.post('/create', linksController.createLink);
  *             schema:
  *               $ref: '#/components/schemas/Link'
  */
-router.get('/sync', linksController.syncExpiredLinks);
+router.delete('/sync', linksController.syncExpiredLinks);
 
 export default router
